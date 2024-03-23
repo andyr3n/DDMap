@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text } from 'react-native';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons for the button icon
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MarkerTypeSelection from './components/MarkerTypeSelection';
 
 const Map = () => {
   const [region, setRegion] = useState({
@@ -11,7 +12,7 @@ const Map = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-
+  const [showMarkerTypeSelection, setShowMarkerTypeSelection] = useState(false);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -37,16 +38,20 @@ const Map = () => {
   }, []);
 
   const goToMyLocation = async () => {
-    console.log('Getting user location...');
     let location = await Location.getCurrentPositionAsync({});
-    console.log('User location:', location);
     const newRegion = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     };
-    mapRef.current.animateToRegion(newRegion, 1000); // Animate to the new region over 1 second
+    mapRef.current.animateToRegion(newRegion, 1000);
+  };
+
+  const addMarker = (type) => {
+    console.log(`Adding a marker of type: ${type}`);
+    setShowMarkerTypeSelection(false);
+    // Here you can add the logic to actually add the marker to the map
   };
 
   return (
@@ -55,15 +60,28 @@ const Map = () => {
         ref={mapRef}
         style={styles.map}
         region={region}
-        onMapReady={() => setRegion(region)} // Update the region when the map is ready
+        onMapReady={() => setRegion(region)}
         showsUserLocation={true}
       />
       <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => setShowMarkerTypeSelection(true)}>
+          <Ionicons name="add" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.buttonText}>Add Marker</Text>
         <TouchableOpacity style={styles.button} onPress={goToMyLocation}>
           <Ionicons name="locate" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>My Position</Text>
       </View>
+      {showMarkerTypeSelection && (
+        <MarkerTypeSelection
+          onTypeSelected={(type) => {
+            addMarker(type);
+            setShowMarkerTypeSelection(false);
+          }}
+          onClose={() => setShowMarkerTypeSelection(false)}
+        />
+      )}
     </View>
   );
 };
@@ -80,7 +98,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: 15, // Adjust this value as needed to position above the navigation bar
+    bottom: 5,
     left: 10,
     alignItems: 'center',
   },
@@ -88,18 +106,37 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 8,
     borderRadius: 30,
+    marginBottom: 5,
   },
   buttonText: {
-    marginTop: 5,
     color: 'black',
+    marginBottom: 5,
   },
+  markerTypeSelection: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: Dimensions.get('window').height / 5,
+    backgroundColor: 'white',
+    padding: 10,
+    paddingTop: 40, // Add padding at the top for the close button
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },  
+  markerTypeButton: {
+    backgroundColor: '#f0f0f0',
+    padding: 8,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
+  },
+  
 });
 
 export default Map;
-
-
-
-
-
-
-
