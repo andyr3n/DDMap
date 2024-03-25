@@ -1,19 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
+import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 
 const Map = () => {
+
   const [region, setRegion] = useState({
     latitude: 49.2827,
     longitude: 123.1207,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+
   const [showMarkerTypeSelection, setShowMarkerTypeSelection] = useState(false);
   const mapRef = useRef(null);
+  const [markers, setMarkers] = useState([]);
+  const [tempMarker, setTempMarker] = useState(null);
+  const [markerDescription, setMarkerDescription] = useState("");
+  const [showDescriptionInput, setShowDescriptionInput] = useState(false);
+
+
+  const saveDescription = (description) => {
+    setMarkerDescription(description);
+    setShowDescriptionInput(false);
+  };
+
 
   useEffect(() => {
     (async () => {
@@ -37,6 +51,28 @@ const Map = () => {
     })();
   }, []);
 
+  const addTempMarker = (type) => {
+    setShowMarkerTypeSelection(false);
+    setTempMarker({
+      id: Math.random().toString(),
+      coordinate: {
+        latitude: region.latitude,
+        longitude: region.longitude,
+      },
+      type: type,
+    });
+  };
+  
+
+  const saveMarker = () => {
+    if (tempMarker) {
+      setMarkers((currentMarkers) => [...currentMarkers, tempMarker]);
+      setTempMarker(null); // Clear the temporary marker
+      setShowMarkerTypeSelection(false);
+      setShowDescriptionInput(true); // Show the description input
+    }
+  };    
+
   const goToMyLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
     const newRegion = {
@@ -51,7 +87,14 @@ const Map = () => {
   const addMarker = (type) => {
     console.log(`Adding a marker of type: ${type}`);
     setShowMarkerTypeSelection(false);
-    // Here you can add the logic to actually add the marker to the map
+    setMarkers((currentMarkers) => [
+      ...currentMarkers,
+      {
+        id: Math.random().toString(), // Assign a unique id for the key prop
+        coordinate: region, // Use the current region as the marker's location
+        type: type,
+      },
+    ]);
   };
 
   return (
@@ -62,7 +105,39 @@ const Map = () => {
         region={region}
         onMapReady={() => setRegion(region)}
         showsUserLocation={true}
-      />
+        onPress={(e) => {
+          if (!tempMarker) {
+            setTempMarker({
+              id: Math.random().toString(),
+              coordinate: e.nativeEvent.coordinate,
+              type: 'Building Number', // Default type, can be changed later in MarkerTypeSelection
+            });
+          }
+        }}        
+      >
+        {tempMarker && (
+          <Marker
+            draggable
+            coordinate={tempMarker.coordinate}
+            onDragEnd={(e) => setTempMarker({ ...tempMarker, coordinate: e.nativeEvent.coordinate })}
+          >
+            <Callout>
+              <Text>{tempMarker.type}</Text>
+            </Callout>
+          </Marker>
+        )}
+        {markers.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={marker.coordinate}
+            title={marker.type}
+          >
+            <Callout>
+              <Text>{marker.type}</Text>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => setShowMarkerTypeSelection(true)}>
           <Ionicons name="add" size={24} color="black" />
@@ -75,15 +150,20 @@ const Map = () => {
       </View>
       {showMarkerTypeSelection && (
         <MarkerTypeSelection
-          onTypeSelected={(type) => {
-            addMarker(type);
-            setShowMarkerTypeSelection(false);
-          }}
+          onMarkerTypeSelected={addTempMarker}
           onClose={() => setShowMarkerTypeSelection(false)}
+          onSave={saveMarker}
+        />
+      )}
+      {showDescriptionInput && (
+        <MarkerDescriptionInput
+          onSaveDescription={saveDescription}
+          onClose={() => setShowDescriptionInput(false)}
         />
       )}
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
