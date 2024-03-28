@@ -23,11 +23,15 @@ const Navigator = () => {
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
+          tabBarActiveTintColor: 'tomato',
+          tabBarInactiveTintColor: 'gray',
+          tabBarStyle: [
+            {
+              display: 'flex',
+            },
+            null,
+          ],
         })}
-        tabBarOptions={{
-          activeTintColor: 'tomato',
-          inactiveTintColor: 'gray',
-        }}
       >
         <Tab.Screen name="Map" component={Map} />
         <Tab.Screen name="Profile" component={Profile} />
