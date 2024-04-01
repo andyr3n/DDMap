@@ -40,16 +40,22 @@ const Profile = () => {
       />
       {editing ? (
         <>
-          <TextInput
-            value={newUsername}
-            onChangeText={setNewUsername}
-            style={styles.input}
-          />
-          <TextInput
-            value={newProfilePicture}
-            onChangeText={setNewProfilePicture}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Username:</Text>
+            <TextInput
+              value={newUsername}
+              onChangeText={setNewUsername}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Profile pic:</Text>
+            <TextInput
+              value={newProfilePicture}
+              onChangeText={setNewProfilePicture}
+              style={styles.input}
+            />
+          </View>
           <Button title="Save Changes" onPress={handleUpdateProfile} />
         </>
       ) : (
@@ -86,18 +92,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  input: {
-    width: '80%',
-    padding: 10,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    padding: 10,
     borderWidth: 1,
     borderColor: 'gray',
     borderRadius: 5,
     backgroundColor: '#fff',
+    maxWidth: 200, // Shorten the text box
   },
 });
 
 export default Profile;
+
+
+
 
 
 
