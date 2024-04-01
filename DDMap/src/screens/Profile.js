@@ -1,18 +1,32 @@
-// src/Profile.js
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Button } from 'react-native';
+import { getAuth, signOut } from '@firebase/auth';
 
 const Profile = () => {
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        console.log('User signed out successfully');
+        // Navigate to the login screen or reset the navigation stack
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: 'https://via.placeholder.com/150' }} // Placeholder image, replace with actual image URL
+        source={{ uri: user?.photoURL || 'https://via.placeholder.com/150' }} // Use user's photo URL if available
         style={styles.profileImage}
       />
-      <Text style={styles.username}>John Doe</Text>
-      <Text style={styles.info}>Email: johndoe@example.com</Text>
-      <Text style={styles.info}>Location: New York, USA</Text>
+      <Text style={styles.username}>{user?.displayName || 'John Doe'}</Text>
+      <Text style={styles.info}>Email: {user?.email || 'johndoe@example.com'}</Text>
       {/* Add more profile details here */}
+      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 };
@@ -43,5 +57,6 @@ const styles = StyleSheet.create({
 });
 
 export default Profile;
+
 
 
