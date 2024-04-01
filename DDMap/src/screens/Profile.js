@@ -1,10 +1,25 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Button } from 'react-native';
-import { getAuth, signOut } from '@firebase/auth';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TextInput, Button } from 'react-native';
+import { getAuth, updateProfile, signOut } from '@firebase/auth';
 
 const Profile = () => {
   const auth = getAuth();
   const user = auth.currentUser;
+  const [editing, setEditing] = useState(false);
+  const [newUsername, setNewUsername] = useState(user.displayName || '');
+  const [newProfilePicture, setNewProfilePicture] = useState(user.photoURL || '');
+
+  const handleUpdateProfile = () => {
+    updateProfile(user, {
+      displayName: newUsername,
+      photoURL: newProfilePicture,
+    }).then(() => {
+      setEditing(false);
+      console.log('Profile updated successfully');
+    }).catch((error) => {
+      console.error('Error updating profile:', error);
+    });
+  };
 
   const handleLogout = () => {
     signOut(auth)
@@ -20,13 +35,31 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: user?.photoURL || 'https://via.placeholder.com/150' }} // Use user's photo URL if available
+        source={{ uri: user.photoURL || 'https://via.placeholder.com/150' }}
         style={styles.profileImage}
       />
-      <Text style={styles.username}>{user?.displayName || 'John Doe'}</Text>
-      <Text style={styles.info}>Email: {user?.email || 'johndoe@example.com'}</Text>
-      {/* Add more profile details here */}
-      <Button title="Logout" onPress={handleLogout} />
+      {editing ? (
+        <>
+          <TextInput
+            value={newUsername}
+            onChangeText={setNewUsername}
+            style={styles.input}
+          />
+          <TextInput
+            value={newProfilePicture}
+            onChangeText={setNewProfilePicture}
+            style={styles.input}
+          />
+          <Button title="Save Changes" onPress={handleUpdateProfile} />
+        </>
+      ) : (
+        <>
+          <Text style={styles.username}>{user.displayName || 'John Doe'}</Text>
+          <Text style={styles.info}>Email: {user.email}</Text>
+          <Button title="Edit Profile" onPress={() => setEditing(true)} />
+          <Button title="Logout" onPress={handleLogout} />
+        </>
+      )}
     </View>
   );
 };
@@ -41,7 +74,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 150,
     height: 150,
-    borderRadius: 75, // Make the image round
+    borderRadius: 75,
     marginBottom: 20,
   },
   username: {
@@ -53,10 +86,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  // Add more styles for your profile screen here
+  input: {
+    width: '80%',
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
 });
 
 export default Profile;
+
+
+
 
 
 
