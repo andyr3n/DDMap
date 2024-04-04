@@ -36,7 +36,6 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
     });
@@ -58,4 +57,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
 
