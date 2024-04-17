@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, TextInput, Button } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,40 +7,27 @@ import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 
 const Map = () => {
-
   const [region, setRegion] = useState({
     latitude: 49.2827,
     longitude: 123.1207,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-
   const [showMarkerTypeSelection, setShowMarkerTypeSelection] = useState(false);
-  const mapRef = useRef(null);
-  const [markers, setMarkers] = useState([]);
-  const [tempMarker, setTempMarker] = useState(null);
-  const [markerDescription, setMarkerDescription] = useState("");
   const [showDescriptionInput, setShowDescriptionInput] = useState(false);
-
-
-  const saveDescription = (description) => {
-    setMarkerDescription(description);
-    setShowDescriptionInput(false);
-  };
-
+  const [tempMarker, setTempMarker] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const [selectedMarkerId, setSelectedMarkerId] = useState(null);
+  const [commentText, setCommentText] = useState('');
+  const mapRef = useRef(null);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Location Permission Required',
-          'This app needs location permissions to function correctly.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Location Permission Required', 'This app needs location permissions to function correctly.', [{ text: 'OK' }]);
         return;
       }
-
       let location = await Location.getCurrentPositionAsync({});
       setRegion({
         latitude: location.coords.latitude,
@@ -51,27 +38,63 @@ const Map = () => {
     })();
   }, []);
 
-  const addTempMarker = (type) => {
-    setShowMarkerTypeSelection(false);
+  const handleAddMarker = () => {
+    const center = mapRef.current.__lastRegion || region;
     setTempMarker({
       id: Math.random().toString(),
       coordinate: {
-        latitude: region.latitude,
-        longitude: region.longitude,
+        latitude: center.latitude,
+        longitude: center.longitude,
       },
-      type: type,
+      type: 'Building Number', // Default type, can be changed later
+      description: '',
+      comments: []
     });
+    setShowDescriptionInput(true);
   };
-  
 
-  const saveMarker = () => {
+  const saveDescription = (description) => {
     if (tempMarker) {
-      setMarkers((currentMarkers) => [...currentMarkers, tempMarker]);
-      setTempMarker(null); // Clear the temporary marker
-      setShowMarkerTypeSelection(false);
-      setShowDescriptionInput(true); // Show the description input
+      setMarkers((currentMarkers) => [
+        ...currentMarkers,
+        { ...tempMarker, description: description }
+      ]);
+      setTempMarker(null);
     }
-  };    
+    setShowDescriptionInput(false);
+  };
+
+  const saveTempMarker = () => {
+    if (tempMarker) {
+      setMarkers((currentMarkers) => [
+        ...currentMarkers,
+        { ...tempMarker }
+      ]);
+      setTempMarker(null);
+      setShowDescriptionInput(false); // Close the description input after saving
+    }
+  };
+
+  const startCommenting = (markerId) => {
+    setSelectedMarkerId(markerId);
+  };
+
+  const addCommentToMarker = (comment) => {
+    setMarkers((currentMarkers) => currentMarkers.map(marker => {
+      if (marker.id === selectedMarkerId) {
+        return { ...marker, comments: [...marker.comments, comment] };
+      }
+      return marker;
+    }));
+    setCommentText('');
+    setSelectedMarkerId(null);
+  };
+
+  const submitComment = () => {
+    if (commentText) {
+      addCommentToMarker(commentText);
+    }
+  };
 
   const goToMyLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
@@ -84,19 +107,6 @@ const Map = () => {
     mapRef.current.animateToRegion(newRegion, 1000);
   };
 
-  const addMarker = (type) => {
-    console.log(`Adding a marker of type: ${type}`);
-    setShowMarkerTypeSelection(false);
-    setMarkers((currentMarkers) => [
-      ...currentMarkers,
-      {
-        id: Math.random().toString(), // Assign a unique id for the key prop
-        coordinate: region, // Use the current region as the marker's location
-        type: type,
-      },
-    ]);
-  };
-
   return (
     <View style={styles.container}>
       <MapView
@@ -105,24 +115,23 @@ const Map = () => {
         region={region}
         onMapReady={() => setRegion(region)}
         showsUserLocation={true}
-        onPress={(e) => {
-          if (!tempMarker) {
-            setTempMarker({
-              id: Math.random().toString(),
-              coordinate: e.nativeEvent.coordinate,
-              type: 'Building Number', // Default type, can be changed later in MarkerTypeSelection
-            });
-          }
-        }}        
       >
         {tempMarker && (
           <Marker
-            draggable
+            key={tempMarker.id}
             coordinate={tempMarker.coordinate}
+            draggable
             onDragEnd={(e) => setTempMarker({ ...tempMarker, coordinate: e.nativeEvent.coordinate })}
           >
             <Callout>
               <Text>{tempMarker.type}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter description"
+                value={tempMarker.description}
+                onChangeText={(text) => setTempMarker({ ...tempMarker, description: text })}
+              />
+              <Button title="Save Marker" onPress={saveTempMarker} />
             </Callout>
           </Marker>
         )}
@@ -132,14 +141,21 @@ const Map = () => {
             coordinate={marker.coordinate}
             title={marker.type}
           >
-            <Callout>
-              <Text>{marker.type}</Text>
+            <Callout onPress={() => startCommenting(marker.id)}>
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <Text>Type: {marker.type}</Text>
+                <Text>Description: {marker.description}</Text>
+                {marker.comments.map((comment, index) => (
+                  <Text key={index}>Comment: {comment}</Text>
+                ))}
+                <Button title="Add Comment" onPress={() => startCommenting(marker.id)} />
+              </View>
             </Callout>
           </Marker>
         ))}
       </MapView>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setShowMarkerTypeSelection(true)}>
+        <TouchableOpacity style={styles.button} onPress={handleAddMarker}>
           <Ionicons name="add" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>Add Marker</Text>
@@ -152,7 +168,7 @@ const Map = () => {
         <MarkerTypeSelection
           onMarkerTypeSelected={addTempMarker}
           onClose={() => setShowMarkerTypeSelection(false)}
-          onSave={saveMarker}
+          onSave={saveDescription}
         />
       )}
       {showDescriptionInput && (
@@ -161,9 +177,19 @@ const Map = () => {
           onClose={() => setShowDescriptionInput(false)}
         />
       )}
+      {selectedMarkerId && (
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter comment"
+            value={commentText}
+            onChangeText={setCommentText}
+          />
+          <Button title="Submit Comment" onPress={submitComment} />
+        </View>
+      )}
     </View>
   );
-  
 };
 
 const styles = StyleSheet.create({
@@ -192,31 +218,24 @@ const styles = StyleSheet.create({
     color: 'black',
     marginBottom: 5,
   },
-  markerTypeSelection: {
+  commentInputContainer: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: Dimensions.get('window').height / 5,
-    backgroundColor: 'white',
+    bottom: 20,
+    left: 20,
+    right: 20,
     padding: 10,
-    paddingTop: 40, // Add padding at the top for the close button
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },  
-  markerTypeButton: {
-    backgroundColor: '#f0f0f0',
-    padding: 8,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'gray',
     borderRadius: 5,
-    marginBottom: 5,
+    padding: 8,
+    marginBottom: 10,
+    height: 40,
+    textAlign: 'center',
   },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    padding: 5,
-  },
-  
 });
 
 export default Map;
