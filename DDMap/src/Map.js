@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, TextInput, Button } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { FontAwesome } from '@expo/vector-icons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 
@@ -48,7 +48,8 @@ const Map = () => {
       },
       type: 'Building Number', // Default type, can be changed later
       description: '',
-      comments: []
+      thumbsUp: 0,
+      thumbsDown: 0
     });
     setShowDescriptionInput(true);
   };
@@ -79,21 +80,22 @@ const Map = () => {
     setSelectedMarkerId(markerId);
   };
 
-  const addCommentToMarker = (comment) => {
+  const thumbUpMarker = (markerId) => {
     setMarkers((currentMarkers) => currentMarkers.map(marker => {
-      if (marker.id === selectedMarkerId) {
-        return { ...marker, comments: [...marker.comments, comment] };
+      if (marker.id === markerId) {
+        return { ...marker, thumbsUp: marker.thumbsUp === 1 ? 0 : 1, thumbsDown: 0 };
       }
       return marker;
     }));
-    setCommentText('');
-    setSelectedMarkerId(null);
   };
 
-  const submitComment = () => {
-    if (commentText) {
-      addCommentToMarker(commentText);
-    }
+  const thumbDownMarker = (markerId) => {
+    setMarkers((currentMarkers) => currentMarkers.map(marker => {
+      if (marker.id === markerId) {
+        return { ...marker, thumbsUp: 0, thumbsDown: marker.thumbsDown === 1 ? 0 : 1 };
+      }
+      return marker;
+    }));
   };
 
   const goToMyLocation = async () => {
@@ -145,10 +147,16 @@ const Map = () => {
               <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                 <Text>Type: {marker.type}</Text>
                 <Text>Description: {marker.description}</Text>
-                {marker.comments.map((comment, index) => (
-                  <Text key={index}>Comment: {comment}</Text>
-                ))}
-                <Button title="Add Comment" onPress={() => startCommenting(marker.id)} />
+                <View style={styles.thumbContainer}>
+                  <TouchableOpacity onPress={() => thumbUpMarker(marker.id)}>
+                    <FontAwesome name="thumbs-up" size={24} color={marker.thumbsUp === 1 ? 'green' : 'black'} />
+                  </TouchableOpacity>
+                  <Text>{marker.thumbsUp}</Text>
+                  <TouchableOpacity onPress={() => thumbDownMarker(marker.id)}>
+                    <FontAwesome name="thumbs-down" size={24} color={marker.thumbsDown === 1 ? 'red' : 'black'} />
+                  </TouchableOpacity>
+                  <Text>{marker.thumbsDown}</Text>
+                </View>
               </View>
             </Callout>
           </Marker>
@@ -156,11 +164,11 @@ const Map = () => {
       </MapView>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleAddMarker}>
-          <Ionicons name="add" size={24} color="black" />
+          <FontAwesome name="plus" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>Add Marker</Text>
         <TouchableOpacity style={styles.button} onPress={goToMyLocation}>
-          <Ionicons name="locate" size={24} color="black" />
+          <FontAwesome name="location-arrow" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>My Position</Text>
       </View>
@@ -176,17 +184,6 @@ const Map = () => {
           onSaveDescription={saveDescription}
           onClose={() => setShowDescriptionInput(false)}
         />
-      )}
-      {selectedMarkerId && (
-        <View style={styles.commentInputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter comment"
-            value={commentText}
-            onChangeText={setCommentText}
-          />
-          <Button title="Submit Comment" onPress={submitComment} />
-        </View>
       )}
     </View>
   );
@@ -213,19 +210,19 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 30,
     marginBottom: 5,
+    width: 50, // Set width to make it circular
+    height: 50, // Set height to make it circular
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     color: 'black',
     marginBottom: 5,
   },
-  commentInputContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    padding: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
+  thumbContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     borderWidth: 1,
