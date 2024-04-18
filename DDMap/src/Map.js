@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, TextInput, Button } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 import MarkerComponent from './components/MarkerComponent';
@@ -21,6 +21,7 @@ const Map = () => {
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [commentText, setCommentText] = useState('');
   const mapRef = useRef(null);
+  const [mapType, setMapType] = useState('standard'); // 'standard' or 'satellite'
 
   useEffect(() => {
     (async () => {
@@ -139,6 +140,7 @@ const Map = () => {
         region={region}
         onMapReady={() => setRegion(region)}
         showsUserLocation={true}
+        mapType={mapType === 'standard' ? 'standard' : 'satellite'}
       >
         {tempMarker && (
           <Marker
@@ -151,6 +153,7 @@ const Map = () => {
         )}
         {markers.map((marker) => (
           <MarkerComponent
+            key={marker.id}
             marker={marker}
             thumbUpMarker={thumbUpMarker}
             thumbDownMarker={thumbDownMarker}
@@ -165,6 +168,10 @@ const Map = () => {
           <FontAwesome name="plus" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>Add Marker</Text>
+        <TouchableOpacity style={styles.button} onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}>
+          <FontAwesome5 name={mapType === 'standard' ? 'satellite-dish' : 'map'} size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.buttonText}>Switch View</Text>
         <TouchableOpacity style={styles.button} onPress={goToMyLocation}>
           <FontAwesome name="location-arrow" size={24} color="black" />
         </TouchableOpacity>
@@ -208,8 +215,8 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 30,
     marginBottom: 5,
-    width: 50, // Set width to make it circular
-    height: 50, // Set height to make it circular
+    width: 45, // Set width to make it circular
+    height: 45, // Set height to make it circular
     justifyContent: 'center',
     alignItems: 'center',
   },
