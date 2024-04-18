@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { FontAwesome } from '@expo/vector-icons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
+import MarkerComponent from './components/MarkerComponent';
 
 const Map = () => {
   const [region, setRegion] = useState({
@@ -98,6 +99,27 @@ const Map = () => {
     }));
   };
 
+  const deleteMarker = (markerId) => {
+    Alert.alert(
+      'Delete Marker',
+      'Are you sure you want to delete this marker?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            setMarkers((currentMarkers) => currentMarkers.filter(marker => marker.id !== markerId));
+          },
+          style: 'destructive'
+        }
+      ],
+      { cancelable: false }
+    );
+  };
+
   const goToMyLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
     const newRegion = {
@@ -125,41 +147,17 @@ const Map = () => {
             draggable
             onDragEnd={(e) => setTempMarker({ ...tempMarker, coordinate: e.nativeEvent.coordinate })}
           >
-            <Callout>
-              <Text>{tempMarker.type}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter description"
-                value={tempMarker.description}
-                onChangeText={(text) => setTempMarker({ ...tempMarker, description: text })}
-              />
-              <Button title="Save Marker" onPress={saveTempMarker} />
-            </Callout>
           </Marker>
         )}
         {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinate={marker.coordinate}
-            title={marker.type}
-          >
-            <Callout onPress={() => startCommenting(marker.id)}>
-              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <Text>Type: {marker.type}</Text>
-                <Text>Description: {marker.description}</Text>
-                <View style={styles.thumbContainer}>
-                  <TouchableOpacity onPress={() => thumbUpMarker(marker.id)}>
-                    <FontAwesome name="thumbs-up" size={24} color={marker.thumbsUp === 1 ? 'green' : 'black'} />
-                  </TouchableOpacity>
-                  <Text>{marker.thumbsUp}</Text>
-                  <TouchableOpacity onPress={() => thumbDownMarker(marker.id)}>
-                    <FontAwesome name="thumbs-down" size={24} color={marker.thumbsDown === 1 ? 'red' : 'black'} />
-                  </TouchableOpacity>
-                  <Text>{marker.thumbsDown}</Text>
-                </View>
-              </View>
-            </Callout>
-          </Marker>
+          <MarkerComponent
+            marker={marker}
+            thumbUpMarker={thumbUpMarker}
+            thumbDownMarker={thumbDownMarker}
+            deleteMarker={deleteMarker}
+            setTempMarker={setTempMarker}
+            saveTempMarker={saveTempMarker}
+          />
         ))}
       </MapView>
       <View style={styles.buttonContainer}>
@@ -219,10 +217,22 @@ const styles = StyleSheet.create({
     color: 'black',
     marginBottom: 5,
   },
+  calloutContainer: {
+    width: 200,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
   thumbContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10, // Increased margin top
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
   },
   input: {
     borderWidth: 1,

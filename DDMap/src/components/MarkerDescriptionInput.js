@@ -1,4 +1,3 @@
-// src/components/MarkerDescriptionInput.js
 import React from 'react';
 import { StyleSheet, View, TextInput, Button } from 'react-native';
 
@@ -18,7 +17,7 @@ const MarkerDescriptionInput = ({ onSaveDescription, onClose }) => {
         value={description}
         onChangeText={setDescription}
       />
-      <Button title="Save Description" onPress={handleSaveDescription} />
+      <Button title="Save Marker" onPress={handleSaveDescription} />
       <Button title="Close" onPress={onClose} />
     </View>
   );
