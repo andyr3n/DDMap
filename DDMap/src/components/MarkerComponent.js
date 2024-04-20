@@ -1,7 +1,13 @@
 import React from 'react';
 import { Marker, Callout } from 'react-native-maps';
-import { View, Text, TouchableOpacity, TextInput, Button } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Button, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+
+// Example icons import, replace 'path_to_icons' with your actual path
+import buildingIcon from '../../assets/markers/Building_marker.png';
+import noteIcon from '../../assets/markers/notes_marker.png';
+import entranceExitIcon from '../../assets/markers/entrance_marker.png';
+import publicWashroomIcon from '../../assets/markers/washroom_marker.png';
 
 const MarkerComponent = ({
   marker,
@@ -11,6 +17,21 @@ const MarkerComponent = ({
   setTempMarker,
   saveTempMarker
 }) => {
+  const getIcon = (type) => {
+    switch (type) {
+      case 'Building Number':
+        return buildingIcon;
+      case 'Note':
+        return noteIcon;
+      case 'Entrance/Exit':
+        return entranceExitIcon;
+      case 'Public Washroom':
+        return publicWashroomIcon;
+      default:
+        return null; // default icon if needed
+    }
+  };
+
   return (
     <Marker
       key={marker.id}
@@ -19,6 +40,7 @@ const MarkerComponent = ({
       draggable={marker.id === (marker.tempMarker ? marker.tempMarker.id : null)}
       onDragEnd={(e) => setTempMarker({ ...marker, coordinate: e.nativeEvent.coordinate })}
     >
+      <Image source={getIcon(marker.type)} style={styles.iconStyle} />
       <Callout>
         <View style={styles.calloutContainer}>
           <Text>Type: {marker.type}</Text>
@@ -54,6 +76,10 @@ const MarkerComponent = ({
 };
 
 const styles = {
+  iconStyle: {
+    width: 30, // Fixed width
+    height: 30, // Fixed height
+  },
   calloutContainer: {
     width: 200,
     padding: 10,
@@ -69,7 +95,7 @@ const styles = {
     marginRight: 5,
   },
   thumbsButton: {
-    marginHorizontal: 10, // Increase horizontal margin
+    marginHorizontal: 10,
   },
   deleteButton: {
     position: 'absolute',
