@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, TextInput, Button } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
@@ -19,9 +19,8 @@ const Map = () => {
   const [tempMarker, setTempMarker] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
-  const [commentText, setCommentText] = useState('');
-  const mapRef = useRef(null);
   const [mapType, setMapType] = useState('standard'); // 'standard' or 'satellite'
+  const mapRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -41,6 +40,10 @@ const Map = () => {
   }, []);
 
   const handleAddMarker = () => {
+    setShowMarkerTypeSelection(true);
+  };
+
+  const addTempMarker = (type) => {
     const center = mapRef.current.__lastRegion || region;
     setTempMarker({
       id: Math.random().toString(),
@@ -48,12 +51,13 @@ const Map = () => {
         latitude: center.latitude,
         longitude: center.longitude,
       },
-      type: 'Building Number', // Default type, can be changed later
+      type: type,
       description: '',
       thumbsUp: 0,
-      thumbsDown: 0
+      thumbsDown: 0,
     });
     setShowDescriptionInput(true);
+    setShowMarkerTypeSelection(false);
   };
 
   const saveDescription = (description) => {
@@ -181,7 +185,6 @@ const Map = () => {
         <MarkerTypeSelection
           onMarkerTypeSelected={addTempMarker}
           onClose={() => setShowMarkerTypeSelection(false)}
-          onSave={saveDescription}
         />
       )}
       {showDescriptionInput && (
@@ -215,40 +218,14 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 30,
     marginBottom: 5,
-    width: 45, // Set width to make it circular
-    height: 45, // Set height to make it circular
+    width: 40, // Set width to make it circular
+    height: 40, // Set height to make it circular
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
     color: 'black',
     marginBottom: 5,
-  },
-  calloutContainer: {
-    width: 200,
-    padding: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
-  },
-  thumbContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10, // Increased margin top
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
-    padding: 8,
-    marginBottom: 10,
-    height: 40,
-    textAlign: 'center',
   },
 });
 

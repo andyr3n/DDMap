@@ -3,15 +3,12 @@ import { StyleSheet, View, TouchableOpacity, Text, Button } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialIcons, FontAwesome5, FontAwesome6 } from '@expo/vector-icons';
 
-const MarkerTypeSelection = ({ onMarkerTypeSelected, onClose, onSave }) => {
-
+const MarkerTypeSelection = ({ onMarkerTypeSelected, onClose }) => {
     const [selectedType, setSelectedType] = useState(null);
-
 
     const handleSaveMarker = () => {
         if (selectedType) {
           onMarkerTypeSelected(selectedType); // Set the type of the temporary marker
-          onSave(); // Save the marker
           setSelectedType(null); // Reset selection
         }
       };
@@ -124,4 +121,3 @@ const styles = StyleSheet.create({
 });
 
 export default MarkerTypeSelection;
-
