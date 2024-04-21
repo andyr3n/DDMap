@@ -2,8 +2,6 @@ import React from 'react';
 import { Marker, Callout } from 'react-native-maps';
 import { View, Text, TouchableOpacity, TextInput, Button, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-
-// Example icons import, replace 'path_to_icons' with your actual path
 import buildingIcon from '../../assets/markers/Building_marker.png';
 import noteIcon from '../../assets/markers/notes_marker.png';
 import entranceExitIcon from '../../assets/markers/entrance_marker.png';

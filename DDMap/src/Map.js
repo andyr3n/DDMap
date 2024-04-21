@@ -20,6 +20,7 @@ const Map = () => {
   const [markers, setMarkers] = useState([]);
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [mapType, setMapType] = useState('standard'); // 'standard' or 'satellite'
+  const [mapTypeText, setMapTypeText] = useState('Satellite View');
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -38,6 +39,10 @@ const Map = () => {
       });
     })();
   }, []);
+
+  useEffect(() => {
+    setMapTypeText(mapType === 'standard' ? 'Satellite View' : 'Default View');
+  }, [mapType]);
 
   const handleAddMarker = () => {
     setShowMarkerTypeSelection(true);
@@ -136,6 +141,10 @@ const Map = () => {
     mapRef.current.animateToRegion(newRegion, 1000);
   };
 
+  const toggleMapType = () => {
+    setMapType(mapType === 'standard' ? 'satellite' : 'standard');
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -172,10 +181,10 @@ const Map = () => {
           <FontAwesome name="plus" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>Add Marker</Text>
-        <TouchableOpacity style={styles.button} onPress={() => setMapType(mapType === 'standard' ? 'satellite' : 'standard')}>
+        <TouchableOpacity style={styles.button} onPress={toggleMapType}>
           <FontAwesome5 name={mapType === 'standard' ? 'satellite-dish' : 'map'} size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.buttonText}>Switch View</Text>
+        <Text style={styles.buttonText}>{mapTypeText}</Text>
         <TouchableOpacity style={styles.button} onPress={goToMyLocation}>
           <FontAwesome name="location-arrow" size={24} color="black" />
         </TouchableOpacity>
@@ -212,6 +221,7 @@ const styles = StyleSheet.create({
     bottom: 5,
     left: 10,
     alignItems: 'center',
+    width: 79,
   },
   button: {
     backgroundColor: 'white',
@@ -226,7 +236,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
     marginBottom: 5,
+    textAlign: 'center',
+    fontSize: 12.5,
   },
 });
 
 export default Map;
+
