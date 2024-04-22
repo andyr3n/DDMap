@@ -22,6 +22,8 @@ const Map = () => {
   const [mapType, setMapType] = useState('standard'); // 'standard' or 'satellite'
   const [mapTypeText, setMapTypeText] = useState('Satellite View');
   const mapRef = useRef(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(null);
 
   useEffect(() => {
     (async () => {
