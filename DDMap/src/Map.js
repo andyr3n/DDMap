@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
@@ -47,6 +47,15 @@ const Map = () => {
   }, [mapType]);
 
   const handleAddMarker = () => {
+    const center = mapRef.current.__lastRegion || region;
+    setTempMarker({
+      id: Math.random().toString(),
+      coordinate: center,
+      type: '', // Placeholder for type, which could be defined later
+      description: '',
+      thumbsUp: 0,
+      thumbsDown: 0
+    });
     setShowMarkerTypeSelection(true);
   };
 
@@ -58,14 +67,14 @@ const Map = () => {
         latitude: center.latitude,
         longitude: center.longitude,
       },
-      type: type,
+      type: type,  // Ensure this sets the type
       description: '',
       thumbsUp: 0,
       thumbsDown: 0,
     });
     setShowDescriptionInput(true);
     setShowMarkerTypeSelection(false);
-  };
+  };  
 
   const saveDescription = (description) => {
     if (tempMarker) {
@@ -88,6 +97,21 @@ const Map = () => {
       setShowDescriptionInput(false); // Close the description input after saving
     }
   };
+
+  const getMarkerImage = (type) => {
+    switch (type) {
+      case 'Building Number':
+        return require('../assets/markers/Building_marker.png');
+      case 'Note':
+        return require('../assets/markers/notes_marker.png');
+      case 'Entrance/Exit':
+        return require('../assets/markers/entrance_marker.png');
+      case 'Public Washroom':
+        return require('../assets/markers/washroom_marker.png');
+      default:
+        return require('../assets/markers/Building_marker.png'); // A default marker image if the type is not recognized
+    }
+  };  
 
   const startCommenting = (markerId) => {
     setSelectedMarkerId(markerId);
@@ -140,7 +164,7 @@ const Map = () => {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     };
-    mapRef.current.animateToRegion(newRegion, 1000);
+    mapRef.current.animateToRegion(newRegion, 500);
   };
 
   const toggleMapType = () => {
@@ -153,19 +177,21 @@ const Map = () => {
         ref={mapRef}
         style={styles.map}
         region={region}
-        onMapReady={() => setRegion(region)}
+        onRegionChangeComplete={(newRegion) => {
+          setRegion(newRegion);
+          if (tempMarker) {
+            setTempMarker(currentMarker => ({
+              ...currentMarker,
+              coordinate: {
+                latitude: newRegion.latitude,
+                longitude: newRegion.longitude
+              }
+            }));
+          }
+        }}
         showsUserLocation={true}
         mapType={mapType === 'standard' ? 'standard' : 'satellite'}
       >
-        {tempMarker && (
-          <Marker
-            key={tempMarker.id}
-            coordinate={tempMarker.coordinate}
-            draggable
-            onDragEnd={(e) => setTempMarker({ ...tempMarker, coordinate: e.nativeEvent.coordinate })}
-          >
-          </Marker>
-        )}
         {markers.map((marker) => (
           <MarkerComponent
             key={marker.id}
@@ -178,6 +204,14 @@ const Map = () => {
           />
         ))}
       </MapView>
+      {tempMarker && tempMarker.type && (
+        <View style={styles.staticMarkerContainer}>
+          <Image
+            style={styles.staticMarker}
+            source={getMarkerImage(tempMarker.type)} // Corrected usage here
+          />
+        </View>
+      )}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleAddMarker}>
           <FontAwesome name="plus" size={24} color="black" />
@@ -191,11 +225,19 @@ const Map = () => {
           <FontAwesome name="location-arrow" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.buttonText}>My Position</Text>
+        {tempMarker && (
+          <TouchableOpacity style={styles.button} onPress={saveTempMarker}>
+            <Text style={styles.buttonText}>Confirm Marker</Text>
+          </TouchableOpacity>
+        )}
       </View>
       {showMarkerTypeSelection && (
         <MarkerTypeSelection
           onMarkerTypeSelected={addTempMarker}
-          onClose={() => setShowMarkerTypeSelection(false)}
+          onClose={() => {
+            setShowMarkerTypeSelection(false);
+            setTempMarker(null); // Cancel temp marker placement
+          }}
         />
       )}
       {showDescriptionInput && (
@@ -205,7 +247,7 @@ const Map = () => {
         />
       )}
     </View>
-  );
+  );  
 };
 
 const styles = StyleSheet.create({
@@ -241,6 +283,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
   },
+  staticMarkerContainer: {
+    position: 'absolute',
+  },
+  staticMarker: {
+    width: 30,
+    height: 30,
+  },
+  
 });
 
 export default Map;

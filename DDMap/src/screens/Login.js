@@ -28,6 +28,7 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.appName}>DDMap</Text>
       <Text style={styles.title}>Login</Text>
       <TextInput
         placeholder="Email"
@@ -61,7 +62,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f5f5f5',
+  },
+  appName: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: 40,
   },
   title: {
     fontSize: 24,
