@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, Image } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
@@ -174,6 +174,7 @@ const Map = () => {
   return (
     <View style={styles.container}>
       <MapView
+        provider={PROVIDER_GOOGLE}
         ref={mapRef}
         style={styles.map}
         region={region}
@@ -272,8 +273,8 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 30,
     marginBottom: 5,
-    width: 40, // Set width to make it circular
-    height: 40, // Set height to make it circular
+    width: 40,
+    height: 40, //circular: width = height
     justifyContent: 'center',
     alignItems: 'center',
   },
