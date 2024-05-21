@@ -50,7 +50,7 @@ const MarkerTypeSelection = ({ onMarkerTypeSelected, onClose }) => {
         </TouchableOpacity>
         {/* Add more options here */}
       </View>
-      <Button title="Save Marker" onPress={handleSaveMarker} disabled={!selectedType} />
+      <Button title="Select Marker" onPress={handleSaveMarker} disabled={!selectedType} />
     </View>
   );
 };

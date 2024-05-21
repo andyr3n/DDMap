@@ -1,6 +1,6 @@
 import React from 'react';
 import { Marker, Callout } from 'react-native-maps';
-import { View, Text, TouchableOpacity, TextInput, Button, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Button, Image, StyleSheet } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import buildingIcon from '../../assets/markers/Building_marker.png';
 import noteIcon from '../../assets/markers/notes_marker.png';
@@ -32,17 +32,18 @@ const MarkerComponent = ({
 
   return (
     <Marker
-      key={marker.id}
       coordinate={marker.coordinate}
       title={marker.type}
+      description={marker.description}
       draggable={marker.id === (marker.tempMarker ? marker.tempMarker.id : null)}
       onDragEnd={(e) => setTempMarker({ ...marker, coordinate: e.nativeEvent.coordinate })}
     >
       <Image source={getIcon(marker.type)} style={styles.iconStyle} />
       <Callout>
         <View style={styles.calloutContainer}>
-          <Text>Type: {marker.type}</Text>
+          <Text>{marker.type}</Text>
           <Text>Description: {marker.description}</Text>
+          <Text>Created by: {marker.username}</Text>
           <View style={styles.thumbContainer}>
             <TouchableOpacity onPress={() => thumbUpMarker(marker.id)} style={styles.thumbsButton}>
               <FontAwesome name="thumbs-up" size={24} color={marker.thumbsUp === 1 ? 'green' : 'black'} />
@@ -73,10 +74,10 @@ const MarkerComponent = ({
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   iconStyle: {
-    width: 30, // Fixed width
-    height: 30, // Fixed height
+    width: 30,
+    height: 30,
   },
   calloutContainer: {
     width: 200,
@@ -109,6 +110,7 @@ const styles = {
     height: 40,
     textAlign: 'center',
   }
-};
+});
 
 export default MarkerComponent;
+

@@ -3,6 +3,7 @@ import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, Image } fr
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { getAuth } from '@firebase/auth';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 import MarkerComponent from './components/MarkerComponent';
@@ -24,6 +25,9 @@ const Map = () => {
   const mapRef = useRef(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
+
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   useEffect(() => {
     (async () => {
@@ -51,8 +55,9 @@ const Map = () => {
     setTempMarker({
       id: Math.random().toString(),
       coordinate: center,
-      type: '', // Placeholder for type, which could be defined later
+      type: '', // Placeholder for type
       description: '',
+      username: user.displayName || 'Unknown User', // username
       thumbsUp: 0,
       thumbsDown: 0
     });
@@ -69,6 +74,7 @@ const Map = () => {
       },
       type: type,  // Ensure this sets the type
       description: '',
+      username: user.displayName || 'Unknown User', // Add username here
       thumbsUp: 0,
       thumbsDown: 0,
     });
@@ -116,7 +122,7 @@ const Map = () => {
   const thumbUpMarker = (markerId) => {
     setMarkers((currentMarkers) => currentMarkers.map(marker => {
       if (marker.id === markerId) {
-        return { ...marker, thumbsUp: marker.thumbsUp === 1 ? 0 : 1, thumbsDown: 0 };
+        return { ...marker, thumbsUp: marker.thumbsUp === 1 ? 0 : marker.thumbsUp + 1, thumbsDown: 0 };
       }
       return marker;
     }));
@@ -125,7 +131,7 @@ const Map = () => {
   const thumbDownMarker = (markerId) => {
     setMarkers((currentMarkers) => currentMarkers.map(marker => {
       if (marker.id === markerId) {
-        return { ...marker, thumbsUp: 0, thumbsDown: marker.thumbsDown === 1 ? 0 : 1 };
+        return { ...marker, thumbsUp: 0, thumbsDown: marker.thumbsDown === 1 ? 0 : marker.thumbsDown + 1 };
       }
       return marker;
     }));
@@ -187,7 +193,7 @@ const Map = () => {
         }}
         showsUserLocation={true}
         mapType={mapType === 'standard' ? 'standard' : 'satellite'}
-        provider={PROVIDER_GOOGLE} // Ensure you're using Google Maps
+        provider={PROVIDER_GOOGLE} //Google Maps
       >
         {markers.map((marker) => (
           <MarkerComponent
@@ -240,7 +246,10 @@ const Map = () => {
       {showDescriptionInput && (
         <MarkerDescriptionInput
           onSaveDescription={saveDescription}
-          onClose={() => setShowDescriptionInput(false)}
+          onClose={() => {
+            setShowDescriptionInput(false);
+            setTempMarker(null); // Reset temp marker when closing description input
+          }}
         />
       )}
     </View>
@@ -294,4 +303,5 @@ const styles = StyleSheet.create({
 });
 
 export default Map;
+
 

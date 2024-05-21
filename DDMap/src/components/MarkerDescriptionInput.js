@@ -9,6 +9,11 @@ const MarkerDescriptionInput = ({ onSaveDescription, onClose }) => {
     setDescription(''); // Reset the input
   };
 
+  const handleClose = () => {
+    onClose();
+    setDescription(''); // Reset the input
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -17,8 +22,10 @@ const MarkerDescriptionInput = ({ onSaveDescription, onClose }) => {
         value={description}
         onChangeText={setDescription}
       />
-      <Button title="Save Marker" onPress={handleSaveDescription} />
-      <Button title="Close" onPress={onClose} />
+      <View style={styles.buttonContainer}>
+        <Button title="Save Marker" onPress={handleSaveDescription} />
+        <Button title="Close" onPress={handleClose} />
+      </View>
     </View>
   );
 };
@@ -33,6 +40,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
+    elevation: 5, // Adds shadow for Android
+    shadowColor: '#000', // Adds shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
   },
   input: {
     width: '100%',
@@ -42,6 +54,16 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 5,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+  }
 });
 
 export default MarkerDescriptionInput;
+
