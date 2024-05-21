@@ -74,7 +74,7 @@ const Map = () => {
     });
     setShowDescriptionInput(true);
     setShowMarkerTypeSelection(false);
-  };  
+  };
 
   const saveDescription = (description) => {
     if (tempMarker) {
@@ -111,10 +111,6 @@ const Map = () => {
       default:
         return require('../assets/markers/Building_marker.png'); // A default marker image if the type is not recognized
     }
-  };  
-
-  const startCommenting = (markerId) => {
-    setSelectedMarkerId(markerId);
   };
 
   const thumbUpMarker = (markerId) => {
@@ -174,7 +170,6 @@ const Map = () => {
   return (
     <View style={styles.container}>
       <MapView
-        provider={PROVIDER_GOOGLE}
         ref={mapRef}
         style={styles.map}
         region={region}
@@ -192,6 +187,7 @@ const Map = () => {
         }}
         showsUserLocation={true}
         mapType={mapType === 'standard' ? 'standard' : 'satellite'}
+        provider={PROVIDER_GOOGLE} // Ensure you're using Google Maps
       >
         {markers.map((marker) => (
           <MarkerComponent
@@ -209,7 +205,7 @@ const Map = () => {
         <View style={styles.staticMarkerContainer}>
           <Image
             style={styles.staticMarker}
-            source={getMarkerImage(tempMarker.type)} // Corrected usage here
+            source={getMarkerImage(tempMarker.type)}
           />
         </View>
       )}
@@ -248,7 +244,7 @@ const Map = () => {
         />
       )}
     </View>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
@@ -274,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginBottom: 5,
     width: 40,
-    height: 40, //circular: width = height
+    height: 40, // Circular: width = height
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -286,6 +282,10 @@ const styles = StyleSheet.create({
   },
   staticMarkerContainer: {
     position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -29, // Adjust this value to move the marker higher
+    marginLeft: -15, // Half of the marker's width
   },
   staticMarker: {
     width: 30,
