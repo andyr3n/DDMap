@@ -23,8 +23,12 @@ const MarkerDescriptionInput = ({ onSaveDescription, onClose }) => {
         onChangeText={setDescription}
       />
       <View style={styles.buttonContainer}>
-        <Button title="Save Marker" onPress={handleSaveDescription} />
-        <Button title="Close" onPress={handleClose} />
+        <View style={styles.buttonWrapper}>
+          <Button title="Save Marker" onPress={handleSaveDescription} />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <Button title="Close" onPress={handleClose} color="red" />
+        </View>
       </View>
     </View>
   );
@@ -59,11 +63,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
-  button: {
+  buttonWrapper: {
     flex: 1,
     marginHorizontal: 5,
   }
 });
 
 export default MarkerDescriptionInput;
+
 

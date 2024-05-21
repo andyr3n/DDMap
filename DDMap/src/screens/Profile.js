@@ -56,14 +56,27 @@ const Profile = () => {
               style={styles.input}
             />
           </View>
-          <Button title="Save Changes" onPress={handleUpdateProfile} />
+          <View style={styles.buttonContainer}>
+            <View style={styles.buttonWrapper}>
+              <Button title="Save Changes" onPress={handleUpdateProfile} />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button title="Cancel" onPress={() => setEditing(false)} color="red" />
+            </View>
+          </View>
         </>
       ) : (
         <>
           <Text style={styles.username}>{user.displayName || 'John Doe'}</Text>
           <Text style={styles.info}>Email: {user.email}</Text>
-          <Button title="Edit Profile" onPress={() => setEditing(true)} />
-          <Button title="Logout" onPress={handleLogout} />
+          <View style={styles.buttonContainer}>
+            <View style={styles.buttonWrapper}>
+              <Button title="Edit Profile" onPress={() => setEditing(true)} />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button title="Logout" onPress={handleLogout} color="red" />
+            </View>
+          </View>
         </>
       )}
     </View>
@@ -76,6 +89,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+    padding: 20,
   },
   profileImage: {
     width: 150,
@@ -108,11 +122,22 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 5,
     backgroundColor: '#fff',
-    maxWidth: 200, // Shorten the text box
+    maxWidth: 200,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 
 export default Profile;
+
 
 
 
