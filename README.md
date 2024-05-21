@@ -15,17 +15,10 @@ DDMap is a mobile application designed to assist delivery drivers in efficiently
 
 ## Screenshots
 
-![Map View](screenshots/Map_view1.png)
-![Map View(Satellite)](screenshots/Map_view2.png)
-![Marker Selection](screenshots/Marker1.png)
-![Marker Description Input](screenshots/Marker2.png)
-![Marker Callouts](screenshots/Marker3.png)
-![Profile](screenshots/Profile1.png)
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/DDMap.git
-   cd DDMap
+![Map View](DDMap/screenshots/Map_view1.png)
+![Map View(Satellite)](DDMap/screenshots/Map_view2.png)
+![Marker Selection](DDMap/screenshots/Marker1.png)
+![Marker Description Input](DDMap/screenshots/Marker2.png)
+![Marker Callouts](DDMap/screenshots/Marker3.png)
+![Profile](DDMap/screenshots/Profile1.png)
 
