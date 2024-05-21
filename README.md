@@ -15,10 +15,22 @@ DDMap is a mobile application designed to assist delivery drivers in efficiently
 
 ## Screenshots
 
-![Map View](DDMap/screenshots/Map_view1.png)
-![Map View(Satellite)](DDMap/screenshots/Map_view2.png)
-![Marker Selection](DDMap/screenshots/Marker1.png)
-![Marker Description Input](DDMap/screenshots/Marker2.png)
-![Marker Callouts](DDMap/screenshots/Marker3.png)
-![Profile](DDMap/screenshots/Profile1.png)
+### Map View
+<img src="DDMap/screenshots/Map_view1.png" alt="Map View" width="300">
+
+### Map View (Satellite)
+<img src="DDMap/screenshots/Map_view2.png" alt="Map View(Satellite)" width="300">
+
+### Marker Selection
+<img src="DDMap/screenshots/Marker1.png" alt="Marker Selection" width="300">
+
+### Marker Description Input
+<img src="DDMap/screenshots/Marker2.png" alt="Marker Description Input" width="300">
+
+### Marker Callouts
+<img src="DDMap/screenshots/Marker3.png" alt="Marker Callouts" width="300">
+
+### Profile
+<img src="DDMap/screenshots/Profile1.png" alt="Profile" width="300">
+
 
