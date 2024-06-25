@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, Image } from 'react-native';
+import { StyleSheet, Dimensions, Alert, View, TouchableOpacity, Text, Image, Platform } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { getAuth } from '@firebase/auth';
 import MarkerTypeSelection from './components/MarkerTypeSelection';
 import MarkerDescriptionInput from './components/MarkerDescriptionInput';
 import MarkerComponent from './components/MarkerComponent';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const Map = () => {
   const [region, setRegion] = useState({
@@ -19,13 +20,9 @@ const Map = () => {
   const [showDescriptionInput, setShowDescriptionInput] = useState(false);
   const [tempMarker, setTempMarker] = useState(null);
   const [markers, setMarkers] = useState([]);
-  const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [mapType, setMapType] = useState('standard'); // 'standard' or 'satellite'
   const [mapTypeText, setMapTypeText] = useState('Satellite View');
   const mapRef = useRef(null);
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState(null);
-
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -57,7 +54,7 @@ const Map = () => {
       coordinate: center,
       type: '', // Placeholder for type
       description: '',
-      username: user.displayName || 'Unknown User', // username
+      username: user ? user.displayName : 'Unknown User', // username
       thumbsUp: 0,
       thumbsDown: 0
     });
@@ -74,7 +71,7 @@ const Map = () => {
       },
       type: type,  // Ensure this sets the type
       description: '',
-      username: user.displayName || 'Unknown User', // Add username here
+      username: user ? user.displayName : 'Unknown User', // Add username here
       thumbsUp: 0,
       thumbsDown: 0,
     });
@@ -173,8 +170,94 @@ const Map = () => {
     setMapType(mapType === 'standard' ? 'satellite' : 'standard');
   };
 
+  const handleSearchResult = (data, details) => {
+    console.log('Search Result:', data, details); // Debugging log
+    if (details) {
+      const { lat, lng } = details.geometry.location;
+      const newRegion = {
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      };
+      setRegion(newRegion);
+      mapRef.current.animateToRegion(newRegion, 500);
+      const newMarker = {
+        id: Math.random().toString(),
+        coordinate: {
+          latitude: lat,
+          longitude: lng,
+        },
+        type: 'Searched Location',  // You can customize this as needed
+        description: data.description,
+        username: user ? user.displayName : 'Unknown User', // Add username here
+        thumbsUp: 0,
+        thumbsDown: 0,
+      };
+      setMarkers((currentMarkers) => [
+        ...currentMarkers,
+        newMarker
+      ]);
+    } else {
+      console.error('Error: Details are undefined');
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <GooglePlacesAutocomplete
+        placeholder='Search'
+        onPress={(data, details = null) => handleSearchResult(data, details)}
+        query={{
+          key: process.env.GOOGLE_MAPS_API_KEY,
+          language: 'en',
+        }}
+        fetchDetails={true}
+        styles={{
+          container: {
+            position: 'absolute',
+            width: '90%',
+            zIndex: 1,
+            top: 15,
+            alignSelf: 'center',
+          },
+          textInputContainer: {
+            width: '100%',
+            borderRadius: 20,
+            overflow: 'hidden',
+            backgroundColor: '#fff',
+            borderWidth: 1,
+            borderColor: '#ccc',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 2,
+          },
+          textInput: {
+            height: 50,
+            color: '#5d5d5d',
+            fontSize: 18,
+            paddingHorizontal: 10,
+          },
+          predefinedPlacesDescription: {
+            color: '#1faadb',
+          },
+          listView: {
+            backgroundColor: '#fff',
+            borderWidth: 1,
+            borderColor: '#ccc',
+            marginTop: 5,
+            borderRadius: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 2,
+          }
+        }}
+        onFail={error => console.error('GooglePlacesAutocomplete Error: ', error)}
+      />
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -193,7 +276,7 @@ const Map = () => {
         }}
         showsUserLocation={true}
         mapType={mapType === 'standard' ? 'standard' : 'satellite'}
-        provider={PROVIDER_GOOGLE} //Google Maps
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : null} // Use Google Maps on Android and default (Apple Maps) on iOS
       >
         {markers.map((marker) => (
           <MarkerComponent
@@ -303,5 +386,3 @@ const styles = StyleSheet.create({
 });
 
 export default Map;
-
-
